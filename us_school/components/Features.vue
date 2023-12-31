@@ -20,7 +20,7 @@
 						<div class="features-item">
 							<div class="icon">
 								<img
-									:data-src="'/assets/' + $store.state.GetLanguage.lang['ficon'+item]"
+									:src="'/src/assets/' + $store.state.GetLanguage.lang['ficon'+item]"
 									class="lazy"
 									:alt="$store.state.GetLanguage.lang['ftext'+item]"
                                   

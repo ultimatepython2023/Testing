@@ -3,23 +3,7 @@
 
 
 
-<section class="hero inner">
-			<div class="container g-4 d-flex flex-column">
-				<nav-layout />
 
-				<!-- Content BEGIN -->
-				<div class="content container m-auto">
-					<div class="row">
-						<div class="col-12 col-lg-8">
-							<div class="header">
-								<h1>{{lang.profile}}</h1>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- Content END -->
-			</div>
-		</section>
 
 
 
@@ -221,7 +205,7 @@
 												<th>#</th>
 											</tr>
 										</thead>
-										<tbody class="text-center" id="data-container">
+										<!-- <tbody class="text-center" id="data-container">
 											<tr v-for="pay in license.payments" v-if="pay.status">
 												<td>{{pay.id}}</td>
 												<td>{{pay.created_at}}</td>
@@ -233,7 +217,7 @@
 													<router-link :to="'invoice?p=' + pay.id + '&l=' + license.license_key" >{{lang.show}}</router-link>
 												</td>
 											</tr>
-										</tbody>
+										</tbody> -->
 									</table>
 							</div>
 							
@@ -394,13 +378,18 @@
 
 
 <script>
+import axios from 'axios'
+
 export default {
 	name:"UserProfile",
+
 	data(){
 		return {
 			token: '',
 			passd_den_meessage: '',
 			passd_succ_meessage: '',
+			url : useRuntimeConfig().public.base_url,
+
 			form: {},
                 message:false,
                 cities: {},
@@ -431,13 +420,13 @@ export default {
         }
     },
 	mounted(){
-		let cookies = this.$auth.$storage.getCookies();
-		this.token  = cookies['auth._token.laravelJWT'];
+	
 		this.getLicense();
 	},
     methods: {
 		updateLicense(){
-			this.$axios.post('/token/profile', this.form)
+
+			axios.post(url+'/token/profile', this.form)
                     .then(response => {
 						if(response.data.result.success){
                         	this.license = response.data.licenseResponse;
@@ -451,7 +440,7 @@ export default {
 		updatePassword(){
 			this.passd_den_meessage = '';
 			this.passd_succ_meessage = '';
-			this.$axios.post('/token/profile-password', this.password)
+			post(url+'/token/profile-password', this.password)
                     .then(response => {
 						if(response.data.result.success){
 							this.password    = {};
@@ -469,7 +458,7 @@ export default {
             });
 		},
 		deletePayment(){
-			this.$axios.delete('/token/profile-delete-payment/' + this.license.id)
+			axios.delete(url+'/token/profile-delete-payment/' + this.license.id)
                     .then(response => {
 						if(response.data.result.success){
 							this.license.payment    = null;
@@ -522,7 +511,7 @@ export default {
 								password: this.pass
 							}
 							this.inProgress = true;
-							this.$axios.post('/token/profile-renew', data)
+							axios.post(url+'/token/profile-renew', data)
 							.then(response => {
 								this.inProgress = false;
 								if(response.data.result.success){
@@ -544,7 +533,7 @@ export default {
 						students: localStorage.getItem('students')
 					};
 					this.inProgress = true;
-					this.$axios.post('/token/profile-renew', data)
+					axios.post(url+'/token/profile-renew', data)
 						.then(response => {
 							this.inProgress = false;
 							if(response.data.result.success){
@@ -559,8 +548,15 @@ export default {
 				}
 		},
 		getLicense(){
-		
-			this.$axios.get('/token/profile?lang=' + this.$route.query.lang)
+			const access_token = localStorage.getItem(("AT"))
+			const headers = {
+
+				"content-type": 'application/json"',
+				"Authorization": "bearer "+ access_token
+				};
+			const url = useRuntimeConfig().public.base_url
+
+			axios.get(url+'/token/profile?lang=' + this.$route.query.lang,{headers} )
                 .then(response => {
                     this.license = response.data.licenseResponse;
                     this.form    = {owner: this.license.owner, mobile: this.license.mobile, key: this.license.license_key};
@@ -568,7 +564,7 @@ export default {
                 .catch((error) =>  console.log('warning'));
 		},
 		logout(){
-			this.$auth.logout();
+			this.$store.dispatch('signout')
 
 		},
 		changeMode(mode){

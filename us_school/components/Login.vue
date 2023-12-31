@@ -167,7 +167,7 @@
 								<!-- Contact Form -->
 								<form @submit.prevent="login">
                                     <div class="col-md-12 text-center mb-4" v-if="message"><div class="alert alert-success">{{ message }}</div></div>
-									<div class="col-md-12 text-center mb-4" v-if="errors"><div class="alert alert-dangers">{{ errors }}</div></div>
+									<div class="col-md-12 text-center mb-4" v-if="error"><div class="alert alert-dangers">{{ error }}</div></div>
 									<!-- Full Name -->
 													<div class="mb-3">
 														<label for="contactFullName" class="form-label"
@@ -211,7 +211,6 @@
 										</button>
 									</div>
 
-									<h1> {{  get_current_user}}</h1>
 
 								</form>
 							</div>
@@ -283,19 +282,17 @@
 				this.message = '';
 				this.errors = '';
 				this.robotMsg = '';
+				this.$store.dispatch('login', {
+					email: this.form.email,
+					password: this.form.password
+				}).then(()=>{
+					if(this.$store.state.Authentication.is_authenticated && this.$store.state.Authentication.auth_status == 'success' ){
+						this.$router.push('/profile')
+					}else{
+						this.error = 'These credentials do not match our records'
 
-
-				//  if (!vm.robot) {
-				// 	this.robotMsg = 'Recaptcha is required.';
-                //     this.inRequest = false;
-                //     return;
-				//  }
-				// this.$auth.loginWith('laravelJWT', {
-				// data: {
-				// 	email: this.form.email,
-				// 	password: this.form.password
-				// }
-				// })
+					}
+				})
 
             },
     }

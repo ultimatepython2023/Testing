@@ -17,7 +17,7 @@ import MobileApp from "@/components/MobileApp.vue"
 import Pricing from "@/components/Pricing.vue"
 
 definePageMeta({
-    middleware:['lang']
+    middleware:['lang', 'auth']
 })
 
 </script>

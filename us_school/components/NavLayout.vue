@@ -19,13 +19,13 @@
 								<div class="d-flex flex-column">
 									<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 										<li innerNavLinksContainer class="nav-item"></li>
-										<li class="nav-item" >
+										<li class="nav-item"  v-if="!$store.state.Authentication.is_authenticated">
 											<a class="nav-link" :href="'/login?lang='+locale">
 											
 												{{lang.login}}
 											</a>
 										</li>
-										<li class="nav-item" >
+										<li class="nav-item" v-if="$store.state.Authentication.is_authenticated" >
 											<router-link class="nav-link" to="/profile">
 												{{lang.profile}}
 											</router-link>
@@ -33,7 +33,7 @@
 										
 										
 
-                                         <li class="nav-item" >
+                                         <li class="nav-item" v-if="$store.state.Authentication.is_authenticated">
 											<div
 												class="nav-link"
 												@click="logout();"
@@ -154,7 +154,10 @@ export default {
 				this.$router.push({ name: RouteName, query: {"lang": this.locale}});
 		},
 		logout(){
-			 this.$auth.logout();
+			this.$store.dispatch('signout').then(()=>{
+				this.$router.push('/')
+
+			 })
 		}
     }
 }
