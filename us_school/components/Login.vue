@@ -199,7 +199,6 @@
 									<!-- Message -->
 									<!-- Send -->
 									<div class="d-flex flex-column flex-md-row gap-4">
-										<a href="/school-create" class="btn btn-outline-dark py-2 my-2 w-100">{{lang.register}}</a>
 										<button
 											type="submit"
 											class="btn btn-outline-primary btn-fancy-primary CTA main w-100 py-2 my-2"
@@ -209,6 +208,7 @@
 												<div class="text text-start mx-2">{{ lang.login }}</div>
 											</div>
 										</button>
+										<a href="/school-create" class="btn btn-outline-dark py-2 my-2 w-100">{{lang.register}}</a>
 									</div>
 
 
@@ -289,7 +289,8 @@
 					if(this.$store.state.Authentication.is_authenticated && this.$store.state.Authentication.auth_status == 'success' ){
 						this.$router.push('/profile')
 					}else{
-						this.error = 'These credentials do not match our records'
+						this.error = 'These credentials do not match our records';
+						this.isRequest = false;
 
 					}
 				})

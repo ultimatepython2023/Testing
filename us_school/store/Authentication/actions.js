@@ -19,7 +19,7 @@ export default {
 
         const url = useRuntimeConfig().public.base_url
         const headers = {
-        "content-type": 'application/json"',
+        "content-type": 'application/json',
         };
         const request = {'email': payload.email, 'password': payload.password}
         await axios.post(url+'/auth/login',request, { headers } ).then((response)=>{
