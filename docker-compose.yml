@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: mysql:8.0
+    container_name: app_mysql
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    volumes:
+      - /home/wisam/app_volumes/db_data:/var/lib/mysql
+
+    networks:
+      - backend-net
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${MYSQL_ROOT_PASSWORD}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+  backend:
+    image: cbankyemen/cby:backend
+    container_name: app_backend
+    restart: always
+
+    ports:
+      - "9000:80"
+
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    volumes:
+      - /home/wisam/app_volumes/backend_docs:/home/wisam/app_volumes/backend_docs
+
+    networks:
+      - backend-net
+      - frontend-net
+
+
+  frontend:
+    image: cbankyemen/cby:frontend
+    container_name: app_frontend
+    restart: always
+
+    ports:
+      - "80:80"
+
+    depends_on:
+      - backend
+
+    networks:
+      - frontend-net
+
+
+networks:
+
+  backend-net:
+    driver: bridge
+
+  frontend-net:
+    driver: bridge
