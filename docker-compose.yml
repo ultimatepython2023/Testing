@@ -44,33 +44,10 @@ services:
 
     ports:
       - "8000:80"
-
+      
+    env_file:
+      - .env
     environment:
-      APP_NAME: "CBY Imports Platform"
-      APP_ENV: production
-      APP_KEY: base64:rDYeH7r2RANVkDCakt6II1xiT90PY6avnuTc7OO0HQg=
-      APP_DEBUG: false
-      APP_URL: /webserve
-      APP_TIMEZONE: Asia/Aden
-      APP_LOCALE: ar
-      LOG_CHANNEL: stack
-      LOGSESSION_DRIVER: database
-      QUEUE_CONNECTION: sync
-      CACHE_STORE: file
-      SANCTUM_STATEFUL_DOMAINS: test-ifcas.ultimate-dev2.com
-      SESSION_DOMAIN: 
-      OTP_TTL_SECONDS: 300
-      FILE_ENCRYPTION_KEY: Dcwp4CvruTfclBuJ5xgkL6Q7+YTpfnMwUsrWN8y2mW4=
-      RUN_MIGRATIONS: false
-      SEED_DEMO_DATA: false
-      MAIL_MAILER: smtp
-      MAIL_HOST: mail.ultimate-dev2.com
-      MAIL_PORT: 465
-      MAIL_USERNAME: ifcas-docker@ultimate-dev2.com
-      MAIL_PASSWORD: d~TzEkc%&L.*
-      MAIL_ENCRYPTION: ssl
-      MAIL_FROM_ADDRESS: ifcas-docker@ultimate-dev2.com
-      MAIL_FROM_NAME: "${APP_NAME}"
       DB_HOST: db
       DB_PORT: 3306
       DB_NAME: ${DB_DATABASE}
