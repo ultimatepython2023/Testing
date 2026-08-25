@@ -1,0 +1,164 @@
+services:
+
+  # ==========================================
+  # MYSQL
+  # ==========================================
+
+  db:
+    image: mysql:8.0
+    container_name: app_mysql
+    restart: always
+
+    ports:
+      - "${MYSQL_EXTERNAL_PORT}:3306"
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      # MySQL database persistence
+      - /home/wisam/app_volumes/db_data:/var/lib/mysql
+
+    networks:
+      - backend-net
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${DB_PASSWORD}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+
+  # ==========================================
+  # LARAVEL BACKEND
+  # ==========================================
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: app_phpmyadmin
+    restart: always
+
+    ports:
+      - "8080:80"
+
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_PASSWORD}
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - backend-net
+      
+      
+  # ==========================================
+  # LARAVEL BACKEND
+  # ==========================================
+  backend:
+    image: cbankyemen/cby:backend
+    container_name: app_backend
+    restart: always
+
+    ports:
+      - "8000:80"
+
+    env_file:
+      - .env
+
+    environment:
+      # Override these values specifically for Docker
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    entrypoint: >
+      sh -c "
+        umask 0022 &&
+        mkdir -p /var/www/html/storage/app/request_documents &&
+        chown -R www-data:www-data /var/www/html/storage &&
+        chown -R www-data:www-data /var/www/html/bootstrap/cache &&
+        find /var/www/html/storage/app/request_documents -type d -exec chmod 755 {} + 2>/dev/null || true &&
+        find /var/www/html/storage/app/request_documents -type f -exec chmod 644 {} + 2>/dev/null || true &&
+        exec php-fpm
+      "
+
+    volumes:
+
+      # ========================================
+      # Laravel documents
+      # Host:
+      # /home/wisam/app_volumes/backend_docs
+      #
+      # Container:
+      # /var/www/html/storage/app
+      # ========================================
+      - /home/wisam/app_volumes/backend_docs:/var/www/html/storage/app
+
+      # ========================================
+      # Laravel logs
+      # Host:
+      # /home/wisam/app_volumes/backend_logs
+      #
+      # Container:
+      # /var/www/html/storage/logs
+      # ========================================
+      - /home/wisam/app_volumes/backend_logs:/var/www/html/storage/logs
+
+    networks:
+      - backend-net
+      - frontend-net
+
+
+  # ==========================================
+  # FRONTEND
+  # ==========================================
+
+  frontend:
+    image: cbankyemen/cby:frontend
+    container_name: app_frontend
+    restart: always
+
+    ports:
+      - "8001:80"
+
+    depends_on:
+      - backend
+
+    networks:
+      - frontend-net
+
+
+# ==========================================
+# NETWORKS
+# ==========================================
+
+networks:
+
+  backend-net:
+    driver: bridge
+
+  frontend-net:
+    driver: bridge
